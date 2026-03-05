@@ -2,7 +2,8 @@
 
 a Simple list of bloxd utilities provided by `Ocelote`, for free!
 
-> [!NOTE] This is all licensable under CC0, hence no need to credit me (you can credit me if you want though :D)
+> [!NOTE]
+> This is all licensable under CC0, hence no need to credit me (you can credit me if you want though :D)
 ### rcf - RayCast Far
 
 This function works just like the regular function `api.raycastForBlock`, except it can go far (usually till the edge of the render distance).
