@@ -698,3 +698,25 @@ Code:
 ```js
 bd=[],bcf=e=>{let t=["#dff8ff","#ffff66","#b3ff66","#66ff66","#66ffb3","#66ffff","#66bcff","#cc66ff","#ff80bb","#ff6666","#ffaa66"],f=e.trim().split("\n");for(let e of f)if(e.includes(":")&&!e.startsWith("Tip")){let f=[],s=e.indexOf(":"),r=e.substring(0,s+1),l=e.substring(s+1),o="",i="#dff8ff";if(r.startsWith("[")){let e=r.indexOf("]"),t=r.substring(0,e+1);t.includes("Youtube")||t.includes("Super")||t.includes("Dev")||(o=t,f.push({str:o,style:{color:"#2eeb82"}}),r=r.slice(o.length))}if(r.includes("[Youtube]")){let e=r.indexOf("[Youtube]");e>0&&f.push({str:r.substring(0,e),style:{color:"#dff8ff"}}),f.push({str:"[",style:{color:"#fff"}},{icon:"youtube",style:{color:"#fe0000"}},{str:" You",style:{color:"#fff"}},{str:"Tube",style:{color:"#fe0000"}},{str:"]",style:{color:"#fff"}}),r=r.slice(e+9)}if(r.includes("[Dev]")){let e=r.indexOf("[Dev]");e>0&&f.push({str:r.substring(0,e),style:{color:"#dff8ff"}}),f.push({str:"[",style:{color:"#cef3ff"}},{icon:"wrench",style:{color:"#a4a4a4"}},{str:" Dev]",style:{color:"#cef3ff"}}),r=r.slice(e+5)}let c=r.match(/\[(\d+)\s?Super\]/);if(c){let e=c[0],s=parseInt(c[1]),l=r.indexOf(e);l>0&&f.push({str:r.substring(0,l),style:{color:"#dff8ff"}}),f.push({str:"[",style:{color:"#fc0"}},{icon:"zap",style:{color:"#fc0"}},{str:" Super]",style:{color:"#fc0"}}),i=t[s]||"#dff8ff",r=r.slice(l+e.length)}f.push({str:r,style:{color:i}});let n="[Tribe]"===o?"#2eeb82":"#ffffff";f.push({str:l,style:{color:n}}),bd.push(f)}else{let t="#cef3ff";(e.endsWith(" has joined the tribe")||"The chunk is now yours. Other players cannot build here."===e||"Protectors protect the chunk they are in, with 32 cubes on each side, as well as the chunk above and below."===e)&&(t="#2eeb82"),(e.endsWith(" has left the tribe")||e.endsWith(" has been removed from the tribe")||e.startsWith("Left tribe ")||e.startsWith("Removed ")&&e.endsWith(" from the tribe"))&&(t="#ff9d87"),bd.push([{str:e,style:{color:t}}])}},playerCommand=(e,t)=>{if("log"===t)for(let t=0;bd.length&&t<16;t++)api.sendMessage(e,bd.shift());return!0};
 ```
+
+# pmd - Parse MarkDown
+
+Usage:
+
+```
+Use **text** or __text__ for bold
+Use *text\* or \_text\_for italic
+Use <b>text</b> for bold
+Use <i>text</i> for italic
+Use > text for blockquote
+Use <color>text</color> for colored text
+Use # text for h1, ## text for h2, ### text for h3 (i.e. the normal font size), so until h89.
+Use --- or ___ or === or *** for a horizontal rule (like -------------------------------)
+Use :iconname: to insert a bloxd-supported icon (make sure to color them accordingly)
+```
+
+Code:
+
+```js
+pmd=(e,t)=>{let l=t?[{str:("-"===t[0]?api.getEntityName(t):t)+": ",style:{color:"#dff8ff"}}]:[],i=!1,n=!1,o=[],f={},s=e.split("\n"),c=0;for(let e of s){if(c++,e.match(/^[-=*_]{2,}$/))l.push({str:e[0].repeat(31),style:{fontWeight:"700"}});else{let t=0;e=e.replace(/^>*\s*/,(e=>(t=e.trim().length,""))),l.push({str:"| ".repeat(t),style:{fontWeight:"900",color:"#aaa"}}),e=e.replace(/^-# /,"#### ");let s=!1,c=e.match(/^#+ /),h=(c?.[0]?.length||4)-1;c&&(s=!0),s&&(e=e.slice(h));let r=3/h+"rem",g=e.split(/(\*\*?|__?|\\|:.*?:|<.*?>)/g),u=!1,p=!1,a=!1,m=!1,y=!1;for(let e of g){if(!e)continue;if(!y){if("**"===e){u=!u;continue}if("*"===e){a=!a;continue}if("__"===e){p=!p;continue}if("_"===e){m=!m;continue}if("\\"===e){y=!0;continue}if(":"===e[0]&&":"===e[e.length-1]){let t="1rem"===r?{}:{fontSize:r};o.length&&(t.color=o[o.length-1]),l.push({icon:e.slice(1,-1),style:t});continue}if("<b>"===e||"<bold>"===e||"<strong>"===e){i=!0;continue}if("</b>"===e||"</bold>"===e||"</strong>"===e){i=!1;continue}if("<i>"===e||"<italic>"===e||"<italics>"===e||"<em>"===e){n=!0;continue}if("</i>"===e||"</italic>"===e||"</italics>"===e||"</em>"===e){n=!1;continue}if("<"===e[0]&&">"===e[e.length-1]){if("/"===e[1]){let t=e.slice(2,-1);if(f[t]){let e=f[t][f[t].length-1];for(let t=o.length-1;t>=e;t--)f[o[t]].length--;o.length=e}else{let e=o.pop();f[e].pop(),0===f[e].length&&delete f[e]}}else{let t=e.slice(1,-1);f[t]||=[],f[t].push(o.length),o.push(t)}continue}}y=!1;let t="1rem"===r?{}:{fontSize:r};o.length&&(t.color=o[o.length-1]),(u||p||i||s)&&(t.fontWeight="900"),(a||m||n)&&(t.fontStyle="italic"),l.push({str:e,style:t})}}c<s.length&&l.push({str:"\n"})}return l};
+```
