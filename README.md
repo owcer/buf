@@ -51,7 +51,7 @@ subTag:"cool person",
 nameColor:"yellow",
 subColor:"yellow"
 }
-onPlayerJoin=()=>{updateLeaderBoard(leaderBoard)}
+onPlayerJoin=()=>{ulb(leaderBoard)}
 ```
 
 or even just:
@@ -63,7 +63,7 @@ nameColor:"gold",
 subColor:"gold"
 }
 onPlayerJoin = (playerId) => {
-updateLeaderBoard(leaderBoard)
+ulb(leaderBoard)
 }
 ```
 
