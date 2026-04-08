@@ -566,8 +566,7 @@ sbr.tick()
 
 ### exe = EXEcute Code Block
 
-Now, there is a function called `exe`, which takes in 3 parameters, x, y, z, and executes the code block at the found position. You can use this to do get practically infinite world code. You need to account for interruptions yourself though (for now).  
-Note: if no code block is found, nothing happens. Also, when executing the code block, `thisPos` WILL work, and be at the location of being evaled. However, `myId` will be undefined in world code (since no specific person is executing the code), unless the function is called from a code block, where it will be the id of the player.
+Takes 3 parameters, `x`, `y`, `z`, and an option 4th one, `myId`, and executes the code block at the found position. Also, when executing the code block, `thisPos` WILL work, and be at the location of being evaled. However, `myId` will be undefined in world code (since no specific person is executing the code), unless the function is called from a code block, where it will be the id of the player. Note: will not be able to load chunks on first player join.
 
 Code:
 
@@ -744,4 +743,52 @@ Code:
 
 ```js
 cbe=(e,t,l)=>{if(l){let r=[t[0],t[1]-1,t[2]],o="Air"===api.getBlock(r);o&&api.setBlock(r,"Stone"),api.attemptCreateThrowable(e,l<2?"Fireball":l<3?"RPG":"Super RPG",t,[0,-1,0],1,1,0,{}),o&&api.setBlock(r,"Air")}};
+```
+
+# bps - Big Player Storage
+
+Uses Moonstone Chests for storage to make it persist through sessions.
+
+Usage:
+- put it in world code
+- `bps[playerId][key] = value` to set a value for a player
+- `bps[playerId][key]` to get a value for a player
+
+Example:
+
+```js
+onPlayerJoin=(pid)=>{
+ bps[pid].jumps ||= 0 //sets coins to 0 if player joined for the first time
+}
+onPlayerJump=(pid)=>{
+  bps[pid].jumps++ //increment jumpcount
+}
+onPlayerCommand=(pid,cmd)=>{
+ if(cmd === "jumps") {
+  let jumps = bps[pid].jumps
+  api.sendMessage(pid,jumps.toString()) 
+ }
+}
+```
+
+
+Also, you might want to do:
+
+```js
+onPlayerJoin=pid=>{
+ {...bps[pid]}
+ //other code
+}
+onPlayerLeave=pid=>{
+ delete bps[pid]
+ //other code
+}
+```
+
+for a slight performance boost, but it's a pretty minor thing and is optional
+
+Code:
+
+```js
+bps=new Proxy(Object.create(null),{has:(e,t)=>api.playerIsInGame(t),get:(e,t)=>e[t]||=new Proxy(Object.create(null),{has:(e,o)=>o in e||(Object.assign(e,JSON.parse(api.getMoonstoneChestItemSlot(t,961*o.charCodeAt(0)+31*o.charCodeAt(o.length>>1)+o.charCodeAt(o.length-1)&31)?.attributes?.customDescription??"{}")),o in e),get:(e,o)=>(o in e||Object.assign(e,JSON.parse(api.getMoonstoneChestItemSlot(t,961*o.charCodeAt(0)+31*o.charCodeAt(o.length>>1)+o.charCodeAt(o.length-1)&31)?.attributes?.customDescription??"{}")),e[o]),set(e,o,s){let n=typeof s;if(null!==s&&!["string","number","boolean","undefined"].includes(n))throw TypeError("Unexpected value type: "+n+" (expected string, number, boolean, or undefined)");let r=961*o.charCodeAt(0)+31*o.charCodeAt(o.length>>1)+o.charCodeAt(o.length-1)&31,i=JSON.parse(api.getMoonstoneChestItemSlot(t,r)?.attributes?.customDescription??"{}");i[o]=s,Object.assign(e,i),api.setMoonstoneChestItemSlot(t,r,"Ice",1,{customDescription:JSON.stringify(i)})},deleteProperty(e,o){let s=961*o.charCodeAt(0)+31*o.charCodeAt(o.length>>1)+o.charCodeAt(o.length-1)&31,n=JSON.parse(api.getMoonstoneChestItemSlot(t,s)?.attributes?.customDescription??"{}");delete n[o],Object.assign(e,n),delete e[o],api.setMoonstoneChestItemSlot(t,s,"Ice",1,{customDescription:JSON.stringify(n)})},setPrototypeOf(){},preventExtensions(){},defineProperty(){},ownKeys:e=>(Object.assign(e,...api.getMoonstoneChestItems(t).map(e=>e?.attributes?.customDescription).filter(e=>e).map(e=>JSON.parse(e))),Reflect.ownKeys(e))}),set(){},setPrototypeOf(){},preventExtensions(){},defineProperty(){},ownKeys:()=>api.getPlayerIds()});
 ```
